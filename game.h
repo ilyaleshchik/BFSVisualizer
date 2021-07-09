@@ -35,7 +35,7 @@ private:
 	int endI = 1, endJ = 1;//BFS ending position
 
 	pair<int, int> **p;//parents array for BFS
-
+	vector<pair<int, int> > path;
 	void BFS();
 	void getPath();//path reconstruction
 	void delPath();//delete old path when end point changed

@@ -133,10 +133,11 @@ void Game::handleEvent() {
             		if(!started) {
             			field[endI][endJ] = 0;
                    		rects[endI][endJ].setFillColor(Color(255, 255, 255));
+            		}else {
+            			delPath();
             		}
             		endI = i; 
             		endJ = j;
-            		pathI = i; pathJ = j;
             		rects[endI][endJ].setFillColor(Color(168, 0, 252));
             		field[endI][endJ] = 2;
             	}
@@ -195,15 +196,19 @@ void Game::BFS() {
 void Game::delPath() {
 
 	//delet old path
-
+	for(pair<int, int> cur: path) {
+		rects[cur.first][cur.second].setFillColor(Color(137, 151, 229));
+	}
+	path.clear();
 }
 
 void Game::getPath() {
 
 	if(endI == -1 || endJ == -1) return;
 
-	if(!field[endI][endJ]) return;
+	if(p[endI][endJ] == make_pair(-1, -1)) return;
 	rects[endI][endJ].setFillColor(Color(95, 217, 85));
+	path.push_back({endI, endJ});
 	int nI = p[endI][endJ].first;
 	int nJ = p[endI][endJ].second;
 	endI = nI;
