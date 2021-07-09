@@ -6,7 +6,7 @@ using namespace sf;
 int main(){	
 
  	
-	Game *g = new Game(800, 800, 20, 20, 10);
+	Game *g = new Game(800, 800, 50, 50, 10);
 	g->init();
 	g->run();
 

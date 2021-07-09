@@ -69,7 +69,17 @@ void Game::init() {
 
 
 void Game::clear() {
-	
+	startI = 0; startJ = 0;
+	endI = 1; endJ = 1;
+	for(int i = 0; i < nFieldHeight; i++)
+		for(int j = 0; j < nFieldWidth; j++) {
+			rects[i][j].setFillColor(Color(255, 255, 255));
+			field[i][j] = 0;
+			p[i][j] = {-1, -1};
+		}
+	I = -1; J = -1;
+	started = 0;
+	while(!q.empty()) q.pop();
 }
 
 
@@ -130,6 +140,8 @@ void Game::handleEvent() {
             		rects[endI][endJ].setFillColor(Color(168, 0, 252));
             		field[endI][endJ] = 2;
             	}
+        	}else if(ev.key.code == Keyboard::C) {
+        		clear();
         	}
         }
         if (Mouse::isButtonPressed(Mouse::Left) && !started) {
