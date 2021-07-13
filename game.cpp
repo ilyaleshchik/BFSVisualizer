@@ -129,7 +129,7 @@ void Game::handleEvent() {
         		Vector2i pos = Mouse::getPosition(*window);
             	int i = pos.x / int(nScreenHeight / nFieldHeight);
             	int j = pos.y / int(nScreenWidth / nFieldWidth);
-            	if(!(i >= nFieldHeight || j >= nFieldWidth || i < 0 || j < 0) && field[i][j] != 2) {
+            	if(!(i >= nFieldHeight || j >= nFieldWidth || i < 0 || j < 0) && field[i][j] != 2 && field[i][j] != 3) {
             		if(!started) {
             			field[endI][endJ] = 0;
                    		rects[endI][endJ].setFillColor(Color(255, 255, 255));
@@ -151,7 +151,7 @@ void Game::handleEvent() {
             int j = pos.y / int(nScreenWidth / nFieldWidth);
             if(!(i >= nFieldHeight || j >= nFieldWidth || i < 0 || j < 0) && field[i][j] != 2) {
             	rects[i][j].setFillColor(Color(73, 78, 78));
-            	field[i][j] = 1;
+            	field[i][j] = 3;
             }
         }else if(Mouse::isButtonPressed(Mouse::Right) && !started) {
         	Vector2i pos = Mouse::getPosition(*window);
@@ -185,7 +185,7 @@ void Game::BFS() {
 	for(int i = 0; i < 4; i++) {
 		int curX = cur.first + dx[i], curY = cur.second + dy[i];
 		if(curX < 0 || curX >= nFieldHeight || curY < 0 || curY >= nFieldWidth) continue;
-		if(field[curX][curY] == 1) continue;
+		if(field[curX][curY] == 1 || field[curX][curY] == 3) continue;
 		q.push({curX, curY});
 		field[curX][curY] = 1;
 		p[curX][curY] = {cur.first, cur.second};
@@ -199,7 +199,11 @@ void Game::delPath() {
 	for(pair<int, int> cur: path) {
 		rects[cur.first][cur.second].setFillColor(Color(137, 151, 229));
 	}
-	path.clear();
+	if(endI != startI && endJ != startJ)
+		rects[endI][endJ].setFillColor(Color(255, 255, 255));
+	else
+		field[path[0].first][path[0].second] = 1;
+	path.clear();			
 }
 
 void Game::getPath() {
@@ -207,6 +211,7 @@ void Game::getPath() {
 	if(endI == -1 || endJ == -1) return;
 
 	if(p[endI][endJ] == make_pair(-1, -1)) return;
+
 	rects[endI][endJ].setFillColor(Color(95, 217, 85));
 	path.push_back({endI, endJ});
 	int nI = p[endI][endJ].first;
