@@ -27,9 +27,11 @@ private:
 
 	queue<pair<int, int> > q;//queue for BFS
 
+	//make vector of pairs may looks better??????
 	int dx[4] = {0, -1, 0, 1};//transitionts for BFS
 	int dy[4] = {1, 0, -1, 0};
-	int pathI, pathJ;//to find a path
+
+	// int pathI, pathJ;//to find a path
 	int I = -1, J = -1;//last drawing position
 	int startI = 0, startJ = 0;//BFS Starting position
 	int endI = 1, endJ = 1;//BFS ending position
@@ -37,6 +39,8 @@ private:
 	pair<int, int> **p;//parents array for BFS
 	vector<pair<int, int> > path;
 	void BFS();
+	void setStartPosition();
+	void setEndPosition();
 	void getPath();//path reconstruction
 	void delPath();//delete old path when end point changed
 

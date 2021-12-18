@@ -89,7 +89,7 @@ void Game::run() {
 	while(!isFinished) {
 
 		handleEvent();
-		// cout << getFPS() << endl;
+		//cerr << getFPS() << endl;
 		updateTime();
 		if(started && TIME >= VisualSpeed)
 			update();
@@ -98,10 +98,37 @@ void Game::run() {
 
 }
 
+void Game::setStartPosition() {
+	if(started) return;
+	Vector2i pos = Mouse::getPosition(*window);
+	int i = int(pos.x) / int(nScreenHeight / nFieldHeight);
+	int j = int(pos.y) / int(nScreenWidth / nFieldWidth);
+	if(!(i >= nFieldHeight || j >= nFieldWidth || i < 0 || j < 0) && field[i][j] != 2) {
+		field[startI][startJ] = 0;
+		rects[startI][startJ].setFillColor(Color(255, 255, 255));
+		startI = i; startJ = j;
+		rects[startI][startJ].setFillColor(Color(242, 8, 53));
+		field[startI][startJ] = 2;
+	}
+}
+void Game::setEndPosition() {
+
+	Vector2i pos = Mouse::getPosition(*window);
+	int i = pos.x / int(nScreenHeight / nFieldHeight);
+	int j = pos.y / int(nScreenWidth / nFieldWidth);
+	if(!(i >= nFieldHeight || j >= nFieldWidth || i < 0 || j < 0) && field[i][j] != 2 && field[i][j] != 3) {
+       	if(started) delPath();
+       	else {
+			field[endI][endJ] = 0;
+	       	rects[endI][endJ].setFillColor(Color(255, 255, 255));
+       	}
+		endI = i;  endJ = j;
+		rects[endI][endJ].setFillColor(Color(168, 0, 252));
+		field[endI][endJ] = 2;
+	}
+}
+
 void Game::handleEvent() {
-
-	//This shit looks really bad i should rewrite it in more smart way!!!!!!!
-
 
 
 	Event ev;
@@ -114,37 +141,15 @@ void Game::handleEvent() {
         		q.push({startI, startJ});
         		field[startI][startJ] = 1;
         	}else if(ev.key.code == Keyboard::X) {
-        		Vector2i pos = Mouse::getPosition(*window);
-            	int i = pos.x / int(nScreenHeight / nFieldHeight);
-            	int j = pos.y / int(nScreenWidth / nFieldWidth);
-            	if(!(i >= nFieldHeight || j >= nFieldWidth || i < 0 || j < 0) && field[i][j] != 2) {
-            		field[startI][startJ] = 0;
-            		rects[startI][startJ].setFillColor(Color(255, 255, 255));
-            		startI = i; 
-            		startJ = j;
-            		rects[startI][startJ].setFillColor(Color(242, 8, 53));
-            		field[startI][startJ] = 2;
-            	}
+        		setStartPosition();
         	}else if(ev.key.code == Keyboard::Z) {
-        		Vector2i pos = Mouse::getPosition(*window);
-            	int i = pos.x / int(nScreenHeight / nFieldHeight);
-            	int j = pos.y / int(nScreenWidth / nFieldWidth);
-            	if(!(i >= nFieldHeight || j >= nFieldWidth || i < 0 || j < 0) && field[i][j] != 2 && field[i][j] != 3) {
-            		if(!started) {
-            			field[endI][endJ] = 0;
-                   		rects[endI][endJ].setFillColor(Color(255, 255, 255));
-            		}else {
-            			delPath();
-            		}
-            		endI = i; 
-            		endJ = j;
-            		rects[endI][endJ].setFillColor(Color(168, 0, 252));
-            		field[endI][endJ] = 2;
-            	}
+        		setEndPosition();
         	}else if(ev.key.code == Keyboard::C) {
         		clear();
         	}
         }
+
+        //MOUSE CLICKS
         if (Mouse::isButtonPressed(Mouse::Left) && !started) {
         	Vector2i pos = Mouse::getPosition(*window);
             int i = pos.x / int(nScreenHeight / nFieldHeight);
@@ -163,25 +168,23 @@ void Game::handleEvent() {
             }
         }
 	}
-
-	//This shit looks really bad i should rewrite it in more smart way!!!!!!!
-
-
 }
 
 void Game::BFS() {
 	if(I >= 0 && !(I == startI && J == startJ) && !(I == endI && J == endJ)) {
 		rects[I][J].setFillColor(Color(137, 151, 229));
-	}
+	}//changing prev cell color
 
 	pair<int, int> cur = q.front();
 	q.pop();
 
+	//changing current cell color
 	if(!(cur.first == startI && cur.second == startJ) && !(cur.first == endI && cur.second == endJ))
 		rects[cur.first][cur.second].setFillColor(Color(52, 212, 203));
 
-	I = cur.first; J = cur.second;
 
+	I = cur.first; J = cur.second; //save this cell to previous
+	//transitions in 4 ways
 	for(int i = 0; i < 4; i++) {
 		int curX = cur.first + dx[i], curY = cur.second + dy[i];
 		if(curX < 0 || curX >= nFieldHeight || curY < 0 || curY >= nFieldWidth) continue;
@@ -196,7 +199,7 @@ void Game::BFS() {
 void Game::delPath() {
 
 	//delet old path
-	for(pair<int, int> cur: path) {
+	for(pair<int, int>& cur: path) {
 		rects[cur.first][cur.second].setFillColor(Color(137, 151, 229));
 	}
 	if(endI != startI && endJ != startJ)
@@ -208,16 +211,14 @@ void Game::delPath() {
 
 void Game::getPath() {
 
-	if(endI == -1 || endJ == -1) return;
-
-	if(p[endI][endJ] == make_pair(-1, -1)) return;
+	if(p[endI][endJ] == make_pair(-1, -1)) return;//if it's end point
 
 	rects[endI][endJ].setFillColor(Color(95, 217, 85));
 	path.push_back({endI, endJ});
 	int nI = p[endI][endJ].first;
 	int nJ = p[endI][endJ].second;
-	endI = nI;
-	endJ = nJ;
+	endI = nI;//transition to parent point
+	endJ = nJ;//transition to parent point
 }
 
 void Game::update() {
@@ -226,19 +227,22 @@ void Game::update() {
 	TIME = 0;
 	if(!q.empty()) BFS();
 	else {
-		if(I >= 0 && !(I == startI && J == startJ))
+		if(I >= 0 && !(I == startI && J == startJ)) {
 			rects[I][J].setFillColor(Color(137, 151, 229));
-		getPath();
+			I = -1; J = -1;
+		}
+		if(p[endI][endJ] != make_pair(-1, -1)) //if we need didn't find all path already
+			getPath();
 	}
 
 }
 void Game::render() {
 
-	window->clear(Color(0, 0, 0, 0));
+	window->clear(Color(0, 0, 0, 0));//clear window
 		
 	for(int i = 0; i < nFieldHeight; i++) {
 		for(int j = 0; j < nFieldWidth; j++) {
-			window->draw(rects[i][j]);
+			window->draw(rects[i][j]);//draw rects
 		}
 	}
 	window->display();
